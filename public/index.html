@@ -56,7 +56,18 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" 
+            onerror="console.error('Failed to load ethers.js from jsdelivr. Trying fallback...'); 
+                     this.src='https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js';"></script>
+    <script>
+        // Wait for ethers to load before initializing app
+        window.addEventListener('load', function() {
+            if (typeof ethers === 'undefined') {
+                console.error('ethers.js failed to load. Please check your internet connection.');
+                document.body.innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h1>Error Loading Dashboard</h1><p>Failed to load ethers.js library. Please refresh the page or check your internet connection.</p></div>';
+            }
+        });
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
