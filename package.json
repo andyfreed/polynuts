@@ -2,12 +2,11 @@
   "name": "polynuts",
   "version": "1.0.0",
   "description": "Polymarket API integration app",
-  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "vercel dev",
-    "watch": "tsc --watch"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "keywords": [
     "polymarket",
@@ -22,15 +21,17 @@
   },
   "dependencies": {
     "@polymarket/clob-client": "^1.0.0",
-    "@vercel/node": "^3.0.7",
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "dotenv": "^16.3.1",
     "axios": "^1.6.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "typescript": "^5.3.3",
-    "ts-node": "^10.9.2",
-    "vercel": "^34.0.0"
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3"
   }
 }
 
