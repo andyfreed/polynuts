@@ -45,9 +45,12 @@ export default async function handler(
     return response.status(200).json(markets);
   } catch (error: any) {
     console.error('Error in /api/markets:', error);
-    return response.status(500).json({
-      error: 'Internal server error',
-      message: error.message,
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch markets';
+    return response.status(statusCode).json({
+      error: 'Failed to fetch markets',
+      message: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 }

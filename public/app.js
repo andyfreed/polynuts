@@ -112,7 +112,14 @@ async function loadMarkets() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const markets = await response.json();
+        const data = await response.json();
+        
+        // Check if response is an error object
+        if (data.error || !Array.isArray(data)) {
+            throw new Error(data.message || data.error || 'Invalid response format');
+        }
+        
+        const markets = data;
         
         if (markets.length === 0) {
             container.innerHTML = '<div class="loading">No markets found</div>';
@@ -172,7 +179,14 @@ async function loadPositions() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const positions = await response.json();
+        const data = await response.json();
+        
+        // Check if response is an error object
+        if (data.error || !Array.isArray(data)) {
+            throw new Error(data.message || data.error || 'Invalid response format');
+        }
+        
+        const positions = data;
         
         if (positions.length === 0) {
             container.innerHTML = '<div class="loading">No positions found</div>';
@@ -211,7 +225,14 @@ async function loadOrders() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const orders = await response.json();
+        const data = await response.json();
+        
+        // Check if response is an error object
+        if (data.error || !Array.isArray(data)) {
+            throw new Error(data.message || data.error || 'Invalid response format');
+        }
+        
+        const orders = data;
         
         if (orders.length === 0) {
             container.innerHTML = '<div class="loading">No orders found</div>';

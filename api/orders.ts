@@ -64,9 +64,21 @@ export default async function handler(
     return response.status(405).json({ error: 'Method not allowed' });
   } catch (error: any) {
     console.error('Error in /api/orders:', error);
-    return response.status(500).json({
-      error: 'Internal server error',
-      message: error.message,
+    
+    // Check if it's a configuration error
+    if (error.message?.includes('Missing required environment variables')) {
+      return response.status(500).json({
+        error: 'Configuration error',
+        message: 'API credentials not configured. Please set POLYMARKET_API_KEY, POLYMARKET_SECRET, and POLYMARKET_PASSPHRASE in Vercel environment variables.',
+      });
+    }
+    
+    const statusCode = error.response?.status || 500;
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch orders';
+    return response.status(statusCode).json({
+      error: 'Failed to fetch orders',
+      message: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 }
