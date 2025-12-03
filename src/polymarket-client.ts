@@ -32,16 +32,30 @@ export interface Position {
 
 export class PolymarketClient {
   private client: AxiosInstance;
+  private dataApiClient: AxiosInstance; // For Gamma/Data-API endpoints
   private config: PolymarketConfig;
 
   constructor(config: PolymarketConfig) {
     this.config = config;
     
-    // Base URL for Polymarket API
-    const baseURL = config.baseUrl || 'https://clob.polymarket.com';
+    // CLOB API base URL for trading operations
+    const clobBaseURL = config.baseUrl || 'https://clob.polymarket.com';
     
+    // Data-API base URL for market data
+    const dataApiBaseURL = 'https://data-api.polymarket.com';
+    
+    // CLOB client with authentication
     this.client = axios.create({
-      baseURL,
+      baseURL: clobBaseURL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 30000,
+    });
+    
+    // Data-API client (no authentication needed for public endpoints)
+    this.dataApiClient = axios.create({
+      baseURL: dataApiBaseURL,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -101,7 +115,7 @@ export class PolymarketClient {
   }
 
   /**
-   * Get list of markets
+   * Get list of markets (uses Gamma API)
    */
   async getMarkets(filters?: {
     active?: boolean;
@@ -110,6 +124,7 @@ export class PolymarketClient {
   }): Promise<Market[]> {
     try {
       const params = new URLSearchParams();
+      // Gamma API parameters
       if (filters?.active !== undefined) {
         params.append('active', filters.active.toString());
       }
@@ -120,8 +135,31 @@ export class PolymarketClient {
         params.append('limit', filters.limit.toString());
       }
 
-      const response = await this.client.get(`/markets?${params.toString()}`);
-      return response.data;
+      // Use Gamma API endpoint for markets
+      // Try both common endpoints
+      try {
+        const response = await this.dataApiClient.get(`/markets?${params.toString()}`);
+        // Handle different response formats
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          return response.data.data;
+        } else if (response.data?.results && Array.isArray(response.data.results)) {
+          return response.data.results;
+        }
+        return [];
+      } catch (err: any) {
+        // Fallback to core endpoint if markets endpoint doesn't work
+        if (err.response?.status === 404) {
+          const coreResponse = await this.dataApiClient.get(`/core/markets?${params.toString()}`);
+          if (Array.isArray(coreResponse.data)) {
+            return coreResponse.data;
+          } else if (coreResponse.data?.data && Array.isArray(coreResponse.data.data)) {
+            return coreResponse.data.data;
+          }
+        }
+        throw err;
+      }
     } catch (error) {
       console.error('Error fetching markets:', error);
       throw error;
@@ -129,12 +167,22 @@ export class PolymarketClient {
   }
 
   /**
-   * Get a specific market by ID
+   * Get a specific market by ID (uses Gamma API)
    */
   async getMarket(marketId: string): Promise<Market> {
     try {
-      const response = await this.client.get(`/markets/${marketId}`);
-      return response.data;
+      // Try Gamma API endpoint
+      try {
+        const response = await this.dataApiClient.get(`/markets/${marketId}`);
+        return response.data?.data || response.data;
+      } catch (err: any) {
+        // Fallback to core endpoint
+        if (err.response?.status === 404) {
+          const coreResponse = await this.dataApiClient.get(`/core/markets/${marketId}`);
+          return coreResponse.data?.data || coreResponse.data;
+        }
+        throw err;
+      }
     } catch (error) {
       console.error(`Error fetching market ${marketId}:`, error);
       throw error;
