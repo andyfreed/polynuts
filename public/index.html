@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polynuts - Polymarket Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Polynuts</h1>
+            <p class="subtitle">Polymarket Dashboard</p>
+            <div class="wallet-section">
+                <button id="connectBtn" class="btn btn-primary">Connect MetaMask</button>
+                <div id="walletInfo" class="wallet-info hidden">
+                    <span id="walletAddress"></span>
+                    <button id="disconnectBtn" class="btn btn-secondary">Disconnect</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Markets Section -->
+            <section class="section">
+                <h2>Markets</h2>
+                <div class="controls">
+                    <button id="loadMarketsBtn" class="btn btn-primary">Load Active Markets</button>
+                    <select id="marketFilter" class="select">
+                        <option value="active">Active Markets</option>
+                        <option value="all">All Markets</option>
+                    </select>
+                </div>
+                <div id="marketsContainer" class="markets-grid">
+                    <div class="loading">Click "Load Active Markets" to fetch markets...</div>
+                </div>
+            </section>
+
+            <!-- Positions Section (requires wallet) -->
+            <section class="section hidden" id="positionsSection">
+                <h2>Your Positions</h2>
+                <button id="loadPositionsBtn" class="btn btn-primary">Load Positions</button>
+                <div id="positionsContainer" class="positions-list">
+                    <div class="loading">Connect your wallet and click "Load Positions"...</div>
+                </div>
+            </section>
+
+            <!-- Orders Section (requires wallet) -->
+            <section class="section hidden" id="ordersSection">
+                <h2>Your Orders</h2>
+                <button id="loadOrdersBtn" class="btn btn-primary">Load Orders</button>
+                <div id="ordersContainer" class="orders-list">
+                    <div class="loading">Connect your wallet and click "Load Orders"...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
