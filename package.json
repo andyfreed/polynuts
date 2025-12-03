@@ -17,6 +17,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@polymarket/clob-client": "^1.0.0",
     "@vercel/node": "^3.0.7",
