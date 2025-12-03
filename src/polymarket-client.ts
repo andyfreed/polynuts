@@ -43,8 +43,8 @@ export class PolymarketClient {
     
     // Gamma API base URL for market data (based on Polymarket docs)
     // Gamma API is typically accessed via a different endpoint
-    // Try common Gamma API URLs
-    const dataApiBaseURL = 'https://gamma-api.polymarket.com' || 'https://data-api.polymarket.com';
+    // Try common Gamma API URLs - use data-api as primary
+    const dataApiBaseURL = 'https://data-api.polymarket.com';
     
     // CLOB client with authentication
     this.client = axios.create({
