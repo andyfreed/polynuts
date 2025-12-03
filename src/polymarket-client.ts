@@ -41,8 +41,10 @@ export class PolymarketClient {
     // CLOB API base URL for trading operations
     const clobBaseURL = config.baseUrl || 'https://clob.polymarket.com';
     
-    // Data-API base URL for market data
-    const dataApiBaseURL = 'https://data-api.polymarket.com';
+    // Gamma API base URL for market data (based on Polymarket docs)
+    // Gamma API is typically accessed via a different endpoint
+    // Try common Gamma API URLs
+    const dataApiBaseURL = 'https://gamma-api.polymarket.com' || 'https://data-api.polymarket.com';
     
     // CLOB client with authentication
     this.client = axios.create({
@@ -136,30 +138,37 @@ export class PolymarketClient {
       }
 
       // Use Gamma API endpoint for markets
-      // Try both common endpoints
-      try {
-        const response = await this.dataApiClient.get(`/markets?${params.toString()}`);
-        // Handle different response formats
-        if (Array.isArray(response.data)) {
-          return response.data;
-        } else if (response.data?.data && Array.isArray(response.data.data)) {
-          return response.data.data;
-        } else if (response.data?.results && Array.isArray(response.data.results)) {
-          return response.data.results;
-        }
-        return [];
-      } catch (err: any) {
-        // Fallback to core endpoint if markets endpoint doesn't work
-        if (err.response?.status === 404) {
-          const coreResponse = await this.dataApiClient.get(`/core/markets?${params.toString()}`);
-          if (Array.isArray(coreResponse.data)) {
-            return coreResponse.data;
-          } else if (coreResponse.data?.data && Array.isArray(coreResponse.data.data)) {
-            return coreResponse.data.data;
+      // According to Polymarket docs, Gamma endpoints are at /gamma/* or /markets
+      // Try multiple possible endpoint structures
+      const endpoints = [
+        `/markets?${params.toString()}`,  // Direct markets endpoint
+        `/gamma/markets?${params.toString()}`,  // Gamma-prefixed
+        `/core/markets?${params.toString()}`,  // Core endpoint
+      ];
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await this.dataApiClient.get(endpoint);
+          // Handle different response formats
+          if (Array.isArray(response.data)) {
+            return response.data;
+          } else if (response.data?.data && Array.isArray(response.data.data)) {
+            return response.data.data;
+          } else if (response.data?.results && Array.isArray(response.data.results)) {
+            return response.data.results;
+          } else if (response.data?.markets && Array.isArray(response.data.markets)) {
+            return response.data.markets;
           }
+        } catch (err: any) {
+          // Try next endpoint if this one fails (unless it's the last one)
+          if (endpoints.indexOf(endpoint) === endpoints.length - 1) {
+            throw err;
+          }
+          continue;
         }
-        throw err;
       }
+      
+      return [];
     } catch (error) {
       console.error('Error fetching markets:', error);
       throw error;
