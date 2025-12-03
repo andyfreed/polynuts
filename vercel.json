@@ -1,10 +1,4 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "version": 2
 }
 
